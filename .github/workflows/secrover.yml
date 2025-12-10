@@ -1,0 +1,114 @@
+name: Daily Secrover Scan
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 3 * * *' # every day at 03:00 UTC
+  workflow_dispatch:
+
+# Allow this job to clone the repo and create a page deployment
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull Secrover Docker Image
+        run: docker pull secrover/secrover
+
+      - name: Run Secrover and organize reports
+        run: |
+          # Carpeta diaria
+          fecha=$(date -u +"%Y-%m-%d")
+          mkdir -p "docs/$fecha"
+
+          # Ejecutar Secrover
+          docker run --rm \
+            -v "$(pwd)/config.yaml:/config.yaml" \
+            -v "$(pwd)/docs/$fecha:/output" \
+            secrover/secrover run --config /config.yaml
+
+          # Crear latest.html que apunta al informe más reciente
+          cat > docs/latest.html <<EOL
+          <!DOCTYPE html>
+          <html>
+          <head>
+          <meta http-equiv="refresh" content="0; url=$fecha/index.html">
+          <title>Latest Secrover Report</title>
+          </head>
+          <body>
+          <p>Redirecting to latest report...</p>
+          </body>
+          </html>
+          EOL
+
+          # Crear index.html maestro con lista de todos los informes
+          cat > docs/index.html <<EOL
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <title>Secrover Reports</title>
+          </head>
+          <body>
+          <h1>Secrover Reports</h1>
+          <ul>
+          EOL
+
+          # Listar carpetas por fecha (ordenadas)
+          for dir in $(ls -d docs/*/ | sort); do
+            folder=$(basename "$dir")
+            if [ "$folder" != "latest.html" ]; then
+              echo "<li><a href='$folder/index.html'>$folder</a></li>" >> docs/index.html
+            fi
+          done
+
+          # Cerrar HTML
+          cat >> docs/index.html <<EOL
+          </ul>
+          </body>
+          </html>
+          EOL
+
+      - name: Commit and push reports
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add docs/
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Daily secrover scan: $(date -u +'%Y-%m-%d %H:%M:%S')"
+            git push
+          fi
+
+  deploy:
+    needs: scan
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: 'docs'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,31 @@
+project:
+  name: portofio
+domains:
+  - elisawaves.es
+  - jbr1989.es
+repos:
+  - url: https://github.com/jbr1989/portafolio.git
+    branch: main
+    description: Portafolio
+  - url: https://github.com/jbr1989/CroquetaBot.git
+    branch: main
+    description: CroquetaBot
+  - url: https://github.com/jbr1989/pokemon_cards.git
+    branch: master
+    description: Pokemon Cards
+  - url: https://github.com/jbr1989/UmaruVerse-HTML.git
+    branch: main
+    description: UmaruVerse HTML
+  - url: https://github.com/jbr1989/UmaruVerse-FlappyMoney.git
+    branch: main
+    description: UmaruVerse FlappyMoney
+  - url: https://github.com/jbr1989/UmaruVerse-FindPartner.git
+    branch: main
+    description: UmaruVerse FindPartner
+  - url: https://github.com/jbr1989/UmaruVerse-CatchManga.git
+    branch: main
+    description: UmaruVerse CatchManga
+  - url: https://github.com/jbr1989/elisawaves-vods.git
+    branch: master
+    description: Elisawaves Vods
+  
