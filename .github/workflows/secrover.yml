@@ -30,31 +30,32 @@ jobs:
         run: |
           # Carpeta diaria
           fecha=$(date -u +"%Y-%m-%d")
-          carpeta="docs/$fecha"
-          
+          carpeta="$fecha"
+
           # Si ya existe, añadir sufijo _2, _3, etc.
-          if [ -d "$carpeta" ]; then
+          if [ -d "docs/$carpeta" ]; then
             contador=2
-            while [ -d "${carpeta}_${contador}" ]; do
+            while [ -d "docs/${carpeta}_${contador}" ]; do
               contador=$((contador + 1))
             done
             carpeta="${carpeta}_${contador}"
           fi
           
-          mkdir -p "$carpeta"
+          echo "Creating report directory: docs/$carpeta"
+          mkdir -p "docs/$carpeta"
 
           # Ejecutar Secrover
           docker run --rm \
             -v "$(pwd)/config.yaml:/config.yaml" \
-            -v "$(pwd)/docs/$fecha:/output" \
-            secrover/secrover sh -c "apt-get update && apt-get upgrade -y && secrover run --config /config.yaml"
+            -v "$(pwd)/docs/$carpeta:/output" \
+            secrover/secrover sh -c "apt-get update -y && apt-get upgrade -y && secrover run --config /config.yaml"
 
           # Crear latest.html que apunta al informe más reciente
           cat > docs/latest.html <<EOL
           <!DOCTYPE html>
           <html>
           <head>
-          <meta http-equiv="refresh" content="0; url=$fecha/index.html">
+          <meta http-equiv="refresh" content="0; url=$carpeta/index.html">
           <title>Latest Secrover Report</title>
           </head>
           <body>
