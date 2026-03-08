@@ -3,6 +3,9 @@ project:
 domains:
   - elisawaves.es
   - jbr1989.es
+  - pokecards.jbr1989.es
+  - umaru.jbr1989.es
+  - apps.jbr1989.es
 repos:
   - url: https://github.com/jbr1989/portafolio.git
     branch: main
