@@ -28,4 +28,7 @@ repos:
   - url: https://github.com/jbr1989/elisawaves-vods.git
     branch: master
     description: Elisawaves Vods
+  - url: git@github.com:jbr1989/apps-list.git
+    branch: main
+    description: Apps List
   
